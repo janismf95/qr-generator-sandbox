@@ -2,17 +2,30 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QR Wallet Generator</title>
     <script src="https://www.paypal.com/sdk/js?client-id=ASJbZBJ7IRxlB15bZhS4KbFu1MbiE2aU_9AjPSXCLPdYV6Cops6hkAWRrnJjEZamWG7YRturVr8CPv_K&currency=EUR"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         :root { --bg: #0b0e11; --card: #1e2329; --gold: #c1a400; --text: #eaeaea; --green: #02c076; --gray: #848e9c; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 15px; box-sizing: border-box; }
         
-        /* Stile del Nuovo Banner */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; /* Allinea in alto per evitare tagli */
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px 15px; /* Più spazio ai bordi */
+            box-sizing: border-box; 
+            overflow-x: hidden;
+        }
+        
         .promo-banner {
             width: 100%;
             max-width: 400px;
@@ -23,20 +36,33 @@
             margin-bottom: 20px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-sizing: border-box;
         }
-        .promo-banner h1 { color: var(--gold); margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
-        .promo-banner p { color: var(--gray); font-size: 14px; margin: 10px 0 0 0; }
-        .promo-features { display: flex; justify-content: space-around; margin-top: 15px; font-size: 11px; color: var(--green); font-weight: bold; }
+        .promo-banner h1 { color: var(--gold); margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .promo-banner p { color: var(--gray); font-size: 13px; margin: 10px 0 0 0; }
+        .promo-features { display: flex; justify-content: space-around; margin-top: 15px; font-size: 10px; color: var(--green); font-weight: bold; }
 
-        .card { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid #333; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #2b3139; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; background: var(--gold); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; color: black; }
+        .card { 
+            background: var(--card); 
+            padding: 25px; 
+            border-radius: 20px; 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+            border: 1px solid #333; 
+            box-sizing: border-box;
+            margin-bottom: 30px; /* Spazio extra in fondo */
+        }
+
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #2b3139; color: white; box-sizing: border-box; font-size: 16px; /* Evita zoom automatico su iPhone */ }
+        button { width: 100%; padding: 14px; background: var(--gold); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; color: black; font-size: 14px; }
         button:disabled { background: var(--gray); cursor: not-allowed; }
         .hidden { display: none; }
         .section { background: #2b3139; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #383f47; }
         #balance { font-size: 32px; font-weight: bold; color: var(--green); margin: 10px 0; }
         #qr-container { margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
-        #qrcode { padding: 15px; background: white; border-radius: 20px; display: inline-block; transition: filter 0.3s; }
+        #qrcode { padding: 10px; background: white; border-radius: 10px; display: inline-block; transition: filter 0.3s; }
+        #qrcode img { max-width: 100%; height: auto; } /* QR responsive */
         .blurred { filter: blur(10px); pointer-events: none; user-select: none; }
         .price-tag { color: var(--gold); font-weight: bold; font-size: 14px; margin-bottom: 10px; }
     </style>
@@ -93,6 +119,7 @@
 </div>
 
 <script type="module">
+    // --- LOGICA INVARIATA ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, update, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -106,16 +133,11 @@
         const title = document.getElementById("title");
         const btn = document.getElementById("btn-auth");
         const toggleP = document.getElementById("toggle-text");
-
         if (mode === "LOGIN") {
-            mode = "SIGNUP";
-            title.innerText = "REGISTRATI";
-            btn.innerText = "REGISTRATI";
+            mode = "SIGNUP"; title.innerText = "REGISTRATI"; btn.innerText = "REGISTRATI";
             toggleP.innerHTML = 'Hai già un account? <b>Accedi</b>';
         } else {
-            mode = "LOGIN";
-            title.innerText = "ACCEDI";
-            btn.innerText = "ACCEDI";
+            mode = "LOGIN"; title.innerText = "ACCEDI"; btn.innerText = "ACCEDI";
             toggleP.innerHTML = 'Non hai un account? <b>Registrati</b>';
         }
     };
@@ -123,34 +145,13 @@
     window.handleAuth = () => {
         const u = document.getElementById("user").value.trim().toLowerCase();
         const p = document.getElementById("pass").value;
-        
-        if(!u || !p) {
-            alert("Inserisci credenziali");
-            return;
-        }
-        
-        if (mode === "SIGNUP" && p.length < 6) {
-            alert("La password deve contenere almeno 6 caratteri");
-            return;
-        }
-        
-        const authRef = push(ref(db, 'auth_requests'), { 
-            Username: u, 
-            Password: p, 
-            Type: mode, 
-            Stato: "PENDING" 
-        });
-        
+        if(!u || !p) return alert("Inserisci credenziali");
+        if (mode === "SIGNUP" && p.length < 6) return alert("Password troppo corta");
+        const authRef = push(ref(db, 'auth_requests'), { Username: u, Password: p, Type: mode, Stato: "PENDING" });
         onValue(authRef, snap => {
             const data = snap.val();
-            if(data?.Stato === "SUCCESS") { 
-                currentUser = u; 
-                off(authRef); 
-                showDash(); 
-            } else if(data?.Stato === "FAIL") {
-                alert("Errore: " + data.Messaggio);
-                off(authRef);
-            }
+            if(data?.Stato === "SUCCESS") { currentUser = u; off(authRef); showDash(); }
+            else if(data?.Stato === "FAIL") { alert("Errore: " + data.Messaggio); off(authRef); }
         });
     };
 
@@ -158,7 +159,6 @@
         document.getElementById("auth-ui").classList.add("hidden");
         document.getElementById("dash-ui").classList.remove("hidden");
         document.getElementById("u-display").innerText = currentUser.toUpperCase();
-
         onValue(ref(db, `utenti/${currentUser}`), s => {
             currentSaldo = s.val()?.saldo || 0;
             document.getElementById("balance").innerText = currentSaldo.toLocaleString('it-IT', {style:'currency', currency:'EUR'});
@@ -169,67 +169,41 @@
     window.generatePreview = () => {
         const text = document.getElementById("qr-text").value;
         if(!text) return alert("Inserisci un testo");
-        
         document.getElementById("qr-result").classList.remove("hidden");
         const qrDiv = document.getElementById("qrcode");
-        qrDiv.innerHTML = "";
-        qrDiv.classList.add("blurred");
-        
+        qrDiv.innerHTML = ""; qrDiv.classList.add("blurred");
         const btnUnlock = document.getElementById("btn-unlock");
-        btnUnlock.classList.remove("hidden");
-        btnUnlock.disabled = false;
-        btnUnlock.innerText = "SBLOCCA E SCARICA";
-        
+        btnUnlock.classList.remove("hidden"); btnUnlock.disabled = false; btnUnlock.innerText = "SBLOCCA E SCARICA";
         document.getElementById("qr-status").innerText = "Costo per scaricare: 1,00 €";
         new QRCode(qrDiv, { text: text, width: 200, height: 200, correctLevel : QRCode.CorrectLevel.H });
     };
 
     window.unlockQR = () => {
         if(currentSaldo < 1) return alert("Saldo insufficiente!");
-        
         const btn = document.getElementById("btn-unlock");
-        btn.innerText = "ATTESA SERVER...";
-        btn.disabled = true;
-
-        const unlockRef = push(ref(db, 'qr_purchases'), { 
-            UserId: currentUser, 
-            Costo: 1.00, 
-            Stato: "PENDING",
-            Timestamp: Date.now()
-        });
-        
+        btn.innerText = "ATTESA SERVER..."; btn.disabled = true;
+        const unlockRef = push(ref(db, 'qr_purchases'), { UserId: currentUser, Costo: 1.00, Stato: "PENDING", Timestamp: Date.now() });
         onValue(unlockRef, snap => {
             const data = snap.val();
             if(data?.Stato === "SUCCESS") {
                 off(unlockRef);
-                const qrDiv = document.getElementById("qrcode");
-                qrDiv.classList.remove("blurred");
+                document.getElementById("qrcode").classList.remove("blurred");
                 btn.classList.add("hidden");
                 document.getElementById("qr-status").innerText = "Sbloccato! Scaricamento...";
-                
                 setTimeout(() => { downloadQR(); }, 800);
             } else if(data?.Stato === "ERROR") {
-                off(unlockRef);
-                alert("Errore: " + (data.Messaggio || "Transazione fallita"));
-                btn.disabled = false;
-                btn.innerText = "SBLOCCA E SCARICA";
+                off(unlockRef); alert("Errore"); btn.disabled = false; btn.innerText = "SBLOCCA E SCARICA";
             }
         });
     };
 
     function downloadQR() {
         const qrElement = document.getElementById("qrcode");
-        html2canvas(qrElement, {
-            scale: 3, 
-            backgroundColor: "#ffffff",
-            useCORS: true
-        }).then(canvas => {
+        html2canvas(qrElement, { scale: 3, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
             const link = document.createElement("a");
-            link.download = `QR_${currentUser}_${Date.now()}.png`;
+            link.download = `QR_${currentUser}.png`;
             link.href = canvas.toDataURL("image/png");
-            document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
             document.getElementById("qr-status").innerText = "Completato!";
         });
     }
@@ -238,25 +212,18 @@
         const container = document.getElementById("paypal-button-container");
         container.innerHTML = "";
         let currentFirebaseKey = null;
-
         paypal.Buttons({
             createOrder: (data, actions) => {
                 const val = parseFloat(document.getElementById("amount").value);
                 const pRef = push(ref(db, 'pagamenti'), { Importo: val, UserId: currentUser, Stato: "PENDING" });
                 currentFirebaseKey = pRef.key;
-
                 return new Promise(res => {
-                    onValue(pRef, s => { 
-                        if(s.val()?.Stato === "READY") { 
-                            off(pRef); 
-                            res(s.val().OrderId); 
-                        }
-                    });
+                    onValue(pRef, s => { if(s.val()?.Stato === "READY") { off(pRef); res(s.val().OrderId); } });
                 });
             },
             onApprove: (data, actions) => {
                 update(ref(db, `pagamenti/${currentFirebaseKey}`), { Stato: "TO_CAPTURE" });
-                alert("Pagamento autorizzato. Caricamento saldo...");
+                alert("Pagamento autorizzato!");
             }
         }).render('#paypal-button-container');
     }
