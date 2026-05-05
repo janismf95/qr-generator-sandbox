@@ -11,19 +11,27 @@
     <style>
         :root { --bg: #0b0e11; --card: #1e2329; --gold: #c1a400; --text: #eaeaea; --green: #02c076; --gray: #848e9c; }
         
+        * { box-sizing: border-box; }
+
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg); 
             color: var(--text); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: flex-start; /* Allinea in alto per evitare tagli */
-            min-height: 100vh; 
             margin: 0; 
-            padding: 20px 15px; /* Più spazio ai bordi */
-            box-sizing: border-box; 
+            padding: 0;
+            width: 100%;
             overflow-x: hidden;
+        }
+
+        /* Nuovo wrapper per gestire lo scroll ed evitare tagli */
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px 15px 40px 15px; /* Spazio generoso in fondo */
         }
         
         .promo-banner {
@@ -36,7 +44,6 @@
             margin-bottom: 20px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            box-sizing: border-box;
         }
         .promo-banner h1 { color: var(--gold); margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
         .promo-banner p { color: var(--gray); font-size: 13px; margin: 10px 0 0 0; }
@@ -50,76 +57,77 @@
             max-width: 400px; 
             text-align: center; 
             border: 1px solid #333; 
-            box-sizing: border-box;
-            margin-bottom: 30px; /* Spazio extra in fondo */
         }
 
-        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #2b3139; color: white; box-sizing: border-box; font-size: 16px; /* Evita zoom automatico su iPhone */ }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #2b3139; color: white; font-size: 16px; }
         button { width: 100%; padding: 14px; background: var(--gold); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; color: black; font-size: 14px; }
         button:disabled { background: var(--gray); cursor: not-allowed; }
         .hidden { display: none; }
         .section { background: #2b3139; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #383f47; }
         #balance { font-size: 32px; font-weight: bold; color: var(--green); margin: 10px 0; }
         #qr-container { margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
-        #qrcode { padding: 10px; background: white; border-radius: 10px; display: inline-block; transition: filter 0.3s; }
-        #qrcode img { max-width: 100%; height: auto; } /* QR responsive */
+        #qrcode { padding: 10px; background: white; border-radius: 10px; display: inline-block; }
+        #qrcode img { max-width: 100%; height: auto; }
         .blurred { filter: blur(10px); pointer-events: none; user-select: none; }
         .price-tag { color: var(--gold); font-weight: bold; font-size: 14px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div class="promo-banner">
-    <h1>QR Generator</h1>
-    <p>Crea, personalizza e scarica i tuoi codici QR professionali in alta definizione.</p>
-    <div class="promo-features">
-        <span>⚡ VELOCE</span>
-        <span>💎 ALTA QUALITÀ</span>
-        <span>🔒 SICURO</span>
-    </div>
-</div>
+<div class="main-wrapper">
 
-<div id="auth-ui" class="card">
-    <h2 id="title">ACCEDI</h2>
-    <input type="text" id="user" placeholder="Username">
-    <input type="password" id="pass" placeholder="Password (min. 6 caratteri)">
-    <button id="btn-auth" onclick="handleAuth()">ACCEDI</button>
-    <p id="toggle-text" onclick="toggleAuth()" style="cursor:pointer; font-size: 13px; margin-top: 15px;">
-        Non hai un account? <b>Registrati</b>
-    </p>
-</div>
-
-<div id="dash-ui" class="card hidden">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div id="u-display" style="color: var(--gold); font-weight: bold;"></div>
-        <span onclick="location.reload()" style="color: var(--gray); cursor: pointer; font-size: 12px;">ESCI</span>
-    </div>
-    
-    <div id="balance">0,00 €</div>
-
-    <div class="section">
-        <label style="font-size: 11px; color: var(--gold);">RICARICA SALDO (€)</label>
-        <input type="number" id="amount" value="5.00" min="1.00">
-        <div id="paypal-button-container"></div>
+    <div class="promo-banner">
+        <h1>QR Generator</h1>
+        <p>Crea, personalizza e scarica i tuoi codici QR professionali in alta definizione.</p>
+        <div class="promo-features">
+            <span>⚡ VELOCE</span>
+            <span>💎 ALTA QUALITÀ</span>
+            <span>🔒 SICURO</span>
+        </div>
     </div>
 
-    <div class="section">
-        <label style="font-size: 11px; color: var(--gold);">GENERA QR (Costo: 1.00€)</label>
-        <input type="text" id="qr-text" placeholder="Inserisci testo o URL">
-        <button onclick="generatePreview()">GENERA ANTEPRIMA</button>
+    <div id="auth-ui" class="card">
+        <h2 id="title">ACCEDI</h2>
+        <input type="text" id="user" placeholder="Username">
+        <input type="password" id="pass" placeholder="Password (min. 6 caratteri)">
+        <button id="btn-auth" onclick="handleAuth()">ACCEDI</button>
+        <p id="toggle-text" onclick="toggleAuth()" style="cursor:pointer; font-size: 13px; margin-top: 15px;">
+            Non hai un account? <b>Registrati</b>
+        </p>
+    </div>
+
+    <div id="dash-ui" class="card hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div id="u-display" style="color: var(--gold); font-weight: bold;"></div>
+            <span onclick="location.reload()" style="color: var(--gray); cursor: pointer; font-size: 12px;">ESCI</span>
+        </div>
         
-        <div id="qr-result" class="hidden">
-            <div id="qr-container">
-                <div id="qrcode" class="blurred"></div>
-                <p id="qr-status" class="price-tag">Costo per scaricare: 1,00 €</p>
-                <button id="btn-unlock" onclick="unlockQR()" style="background: var(--green); color: white;">SBLOCCA E SCARICA</button>
+        <div id="balance">0,00 €</div>
+
+        <div class="section">
+            <label style="font-size: 11px; color: var(--gold);">RICARICA SALDO (€)</label>
+            <input type="number" id="amount" value="5.00" min="1.00">
+            <div id="paypal-button-container"></div>
+        </div>
+
+        <div class="section">
+            <label style="font-size: 11px; color: var(--gold);">GENERA QR (Costo: 1.00€)</label>
+            <input type="text" id="qr-text" placeholder="Inserisci testo o URL">
+            <button onclick="generatePreview()">GENERA ANTEPRIMA</button>
+            
+            <div id="qr-result" class="hidden">
+                <div id="qr-container">
+                    <div id="qrcode" class="blurred"></div>
+                    <p id="qr-status" class="price-tag">Costo per scaricare: 1,00 €</p>
+                    <button id="btn-unlock" onclick="unlockQR()" style="background: var(--green); color: white;">SBLOCCA E SCARICA</button>
+                </div>
             </div>
         </div>
     </div>
+
 </div>
 
 <script type="module">
-    // --- LOGICA INVARIATA ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, update, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -130,9 +138,7 @@
     let mode = "LOGIN", currentUser = null, currentSaldo = 0;
 
     window.toggleAuth = () => {
-        const title = document.getElementById("title");
-        const btn = document.getElementById("btn-auth");
-        const toggleP = document.getElementById("toggle-text");
+        const title = document.getElementById("title"), btn = document.getElementById("btn-auth"), toggleP = document.getElementById("toggle-text");
         if (mode === "LOGIN") {
             mode = "SIGNUP"; title.innerText = "REGISTRATI"; btn.innerText = "REGISTRATI";
             toggleP.innerHTML = 'Hai già un account? <b>Accedi</b>';
@@ -143,15 +149,13 @@
     };
 
     window.handleAuth = () => {
-        const u = document.getElementById("user").value.trim().toLowerCase();
-        const p = document.getElementById("pass").value;
+        const u = document.getElementById("user").value.trim().toLowerCase(), p = document.getElementById("pass").value;
         if(!u || !p) return alert("Inserisci credenziali");
-        if (mode === "SIGNUP" && p.length < 6) return alert("Password troppo corta");
         const authRef = push(ref(db, 'auth_requests'), { Username: u, Password: p, Type: mode, Stato: "PENDING" });
         onValue(authRef, snap => {
-            const data = snap.val();
-            if(data?.Stato === "SUCCESS") { currentUser = u; off(authRef); showDash(); }
-            else if(data?.Stato === "FAIL") { alert("Errore: " + data.Messaggio); off(authRef); }
+            const d = snap.val();
+            if(d?.Stato === "SUCCESS") { currentUser = u; off(authRef); showDash(); }
+            else if(d?.Stato === "FAIL") { alert(d.Messaggio); off(authRef); }
         });
     };
 
@@ -168,43 +172,36 @@
 
     window.generatePreview = () => {
         const text = document.getElementById("qr-text").value;
-        if(!text) return alert("Inserisci un testo");
+        if(!text) return alert("Inserisci testo");
         document.getElementById("qr-result").classList.remove("hidden");
         const qrDiv = document.getElementById("qrcode");
         qrDiv.innerHTML = ""; qrDiv.classList.add("blurred");
-        const btnUnlock = document.getElementById("btn-unlock");
-        btnUnlock.classList.remove("hidden"); btnUnlock.disabled = false; btnUnlock.innerText = "SBLOCCA E SCARICA";
-        document.getElementById("qr-status").innerText = "Costo per scaricare: 1,00 €";
+        document.getElementById("btn-unlock").classList.remove("hidden");
         new QRCode(qrDiv, { text: text, width: 200, height: 200, correctLevel : QRCode.CorrectLevel.H });
     };
 
     window.unlockQR = () => {
-        if(currentSaldo < 1) return alert("Saldo insufficiente!");
+        if(currentSaldo < 1) return alert("Saldo insufficiente");
         const btn = document.getElementById("btn-unlock");
-        btn.innerText = "ATTESA SERVER..."; btn.disabled = true;
-        const unlockRef = push(ref(db, 'qr_purchases'), { UserId: currentUser, Costo: 1.00, Stato: "PENDING", Timestamp: Date.now() });
+        btn.innerText = "ATTESA..."; btn.disabled = true;
+        const unlockRef = push(ref(db, 'qr_purchases'), { UserId: currentUser, Costo: 1.00, Stato: "PENDING" });
         onValue(unlockRef, snap => {
-            const data = snap.val();
-            if(data?.Stato === "SUCCESS") {
+            const d = snap.val();
+            if(d?.Stato === "SUCCESS") {
                 off(unlockRef);
                 document.getElementById("qrcode").classList.remove("blurred");
                 btn.classList.add("hidden");
-                document.getElementById("qr-status").innerText = "Sbloccato! Scaricamento...";
-                setTimeout(() => { downloadQR(); }, 800);
-            } else if(data?.Stato === "ERROR") {
-                off(unlockRef); alert("Errore"); btn.disabled = false; btn.innerText = "SBLOCCA E SCARICA";
+                setTimeout(downloadQR, 500);
             }
         });
     };
 
     function downloadQR() {
-        const qrElement = document.getElementById("qrcode");
-        html2canvas(qrElement, { scale: 3, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
+        html2canvas(document.getElementById("qrcode"), { scale: 3 }).then(canvas => {
             const link = document.createElement("a");
-            link.download = `QR_${currentUser}.png`;
-            link.href = canvas.toDataURL("image/png");
+            link.download = `QR_${Date.now()}.png`;
+            link.href = canvas.toDataURL();
             link.click();
-            document.getElementById("qr-status").innerText = "Completato!";
         });
     }
 
